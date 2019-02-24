@@ -4,7 +4,6 @@
 
 // Environment switch
 // Must have NODE_ENV set in package.json script
-const devMode = process.env.NODE_ENV.trim() !== 'production';
 console.log(process.env.NODE_ENV.toUpperCase());
 
 // Plugins & optimizers
@@ -24,7 +23,6 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '../');
 const dirDistribution = 'dist/';
 const dirSrc = 'src/';
-
 
 //
 // Start of config
@@ -68,7 +66,7 @@ module.exports = {
         test: /\.s?css$/,
         exclude: path.resolve(ROOT, dirSrc, 'styles'),
         use: [
-          devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+          MiniCssExtractPlugin.loader,
           {
             loader: 'css-loader',
             options: {
@@ -90,7 +88,7 @@ module.exports = {
         test: /\.s?css$/,
         include: path.resolve(ROOT, dirSrc, 'styles'),
         use: [
-          devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+          MiniCssExtractPlugin.loader,
           {
             loader: 'css-loader',
             options: {
@@ -125,10 +123,12 @@ module.exports = {
       filename: 'styles/[name].dist.css',
       chunkFilename: 'styles/[id].dist.css',
     }),
+
   ],
   optimization: {
     minimizer: [
       new OptimizeCSSAssetsPlugin({}),
+      new UglifyJsPlugin()
     ],
   },
   stats: {

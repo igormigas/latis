@@ -18,6 +18,7 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
 
   let $container = _reference.current;
   let items = $container.childNodes;
+  let calculateGrid;
 
   const settings = {
     classItem:          _settings.item || '.item',
@@ -26,7 +27,6 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
     maxRowHeight:       _settings.maxRowHeight || 350,
     gutter:             _settings.gutter || 15,
     hideOverload:       _settings.hideOverload || false,
-
     minColumnWidth:     _settings.minColumnWidth || 200,
   }
 
@@ -35,18 +35,27 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
     finalContainerHeight: 0,
   }
 
+  // PREPARATION
+
   if(['absolute', 'fixed', 'relative'].includes($container.style.position) === false ) {
     $container.style.position = 'relative';
   }
+  if (_method == 'horizontal') {
+    calculateGrid = calculateGridHorizontal;
+  } else {
+    calculateGrid = calculateGridVertical;
+  }
+
+  // PROCESS
 
   buildItemDataStructure();
-  if (_method == 'horizontal') {
-    calculateGridHorizontal([...items]);
-  } else {
-    calculateGridVertical([...items]);
-  }
-  $container.style.height = px(Math.ceil(state.finalContainerHeight));
+  calculateGrid([...items]);
+  setContainerHeightStyle(state.finalContainerHeight);
   pushToDOM(items);
+
+  //
+  // FUNCTIONS
+  //
 
   // Define size and ratio of each element
   function buildItemDataStructure() {
@@ -62,7 +71,7 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
         params.originalHeight = item.clientHeight;
       }
       params.ratio = params.originalWidth/params.originalHeight;
-      item.GH = params;
+      item.latis = params;
     }
   }
 
@@ -85,8 +94,8 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
     for(let i=0, countItems = array.length; i < countItems; i++) {
       const item = array[i];
       const columnId = getShortestColumnId();
-      const calcItemHeight = getHeightByWidth(calcColumnWidth, item.GH.ratio);
-      setGHParams(
+      const calcItemHeight = getHeightByWidth(calcColumnWidth, item.latis.ratio);
+      setItemParams(
         item,
         calcColumnWidth,
         calcItemHeight,
@@ -137,27 +146,27 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
 
       if(containerWidth < minContainerWidth) {
         let item = subArray[0];
-        setGHParams(
+        setItemParams(
           item,
           containerWidth,
-          getHeightByWidth(containerWidth, item.GH.ratio),
+          getHeightByWidth(containerWidth, item.latis.ratio),
           currentOffsetTop,
           0,
         );
-        currentRowHeight = item.GH.originalHeight;
+        currentRowHeight = item.latis.originalHeight;
       } else if((currentRowHeight=sliceHeightCalc(subArray)) < maxRowHeight) {
         let currentOffsetLeft = 0;
 
         for(let i=0, len = array.length; i<len; i++) {
           let item = array[i];
-          setGHParams(
+          setItemParams(
             item,
-            getWidthByHeight(currentRowHeight, item.GH.ratio),
+            getWidthByHeight(currentRowHeight, item.latis.ratio),
             currentRowHeight,
             currentOffsetTop,
             currentOffsetLeft,
           );
-          currentOffsetLeft += item.GH.width + gutter;
+          currentOffsetLeft += item.latis.width + gutter;
         }
       } else {
         continue;
@@ -179,9 +188,9 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
       } else {
         for(let i=0, len = array.length; i<len; i++) {
           let item = array[i];
-          setGHParams(
+          setItemParams(
             item,
-            getWidthByHeight(maxRowHeight, item.GH.ratio),
+            getWidthByHeight(maxRowHeight, item.latis.ratio),
             maxRowHeight,
             currentOffsetTop,
             currentOffsetLeft,
@@ -195,10 +204,14 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
     state.finalContainerHeight = currentOffsetTop;
   }
 
+  function setContainerHeightStyle(value) {
+    $container.style.height = px(Math.ceil(value));
+  }
+
   function pushToDOM(items) {
     for(let i=0;i<items.length;++i) {
       let item = items[i].style;
-      let lib = items[i].GH;
+      let lib = items[i].latis;
       item.position = 'absolute';
       item.width = px(lib.width);
       item.height = px(lib.height);
@@ -214,17 +227,17 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
 
     let sumRatio = 0;
     for (let i=0,len=array.length; i<len;i++) {
-      sumRatio += array[i].GH.ratio;
+      sumRatio += array[i].latis.ratio;
     }
 
     return (sumRatio > 0) ? workWidth/sumRatio : 0;
   }
 
-  function setGHParams(item, width, height, offTop, offLeft) {
-    item.GH.width = width;
-    item.GH.height = height;
-    item.GH.offsetTop = offTop;
-    item.GH.offsetLeft = offLeft;
+  function setItemParams(item, width, height, offTop, offLeft) {
+    item.latis.width = width;
+    item.latis.height = height;
+    item.latis.offsetTop = offTop;
+    item.latis.offsetLeft = offLeft;
   }
 
   function px(val) {
@@ -245,7 +258,7 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
 
   return {
     horizontal: () => {
-      const a = setGHParams;
+      const a = setItemParams;
       return a;
     },
     vertical: () => {
