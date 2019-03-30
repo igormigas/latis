@@ -9,6 +9,7 @@ console.log(process.env.NODE_ENV.toUpperCase());
 // Plugins & optimizers
 const webpack = require('webpack');
 const dotenv = require('dotenv');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
@@ -20,7 +21,8 @@ const path = require('path');
 // Paths & directories
 //
 const ROOT = path.resolve(__dirname, '../');
-const dirDistribution = 'dist/';
+const dirApp = 'dev/'
+const dirDistribution = 'demo/';
 const dirSrc = 'src/';
 
 //
@@ -30,13 +32,13 @@ module.exports = {
   mode: 'production',
   devtool: false,
   entry: {
-    index: path.resolve(ROOT, dirSrc, 'index.js'),
+    index: path.resolve(ROOT, dirApp, 'index.js'),
   },
   output: {
     path: path.resolve(ROOT, dirDistribution),
     filename: '[name].js',
-    publicPath: '/',
-    library: 'latis',
+    publicPath: './',
+    library: '',
     libraryTarget: 'umd',
     libraryExport: 'default',
   },
@@ -63,7 +65,7 @@ module.exports = {
       },
       {
         test: /\.s?css$/,
-        exclude: path.resolve(ROOT, dirSrc, 'styles'),
+        exclude: path.resolve(ROOT, dirApp, 'styles'),
         use: [
           MiniCssExtractPlugin.loader,
           {
@@ -85,7 +87,7 @@ module.exports = {
       },
       {
         test: /\.s?css$/,
-        include: path.resolve(ROOT, dirSrc, 'styles'),
+        include: path.resolve(ROOT, dirApp, 'styles'),
         use: [
           MiniCssExtractPlugin.loader,
           {
@@ -118,11 +120,15 @@ module.exports = {
     ],
   },
   plugins: [
+    new HtmlWebpackPlugin({
+      template: path.resolve(ROOT, dirApp, 'template.html'),
+      filename: path.resolve(ROOT, dirDistribution, 'index.html'),
+      inject: 'body',
+    }),
     new MiniCssExtractPlugin({
       filename: 'styles/[name].dist.css',
       chunkFilename: 'styles/[id].dist.css',
     }),
-
   ],
   optimization: {
     minimizer: [
@@ -131,5 +137,5 @@ module.exports = {
   },
   stats: {
     colors: true,
-  },
+  }
 };

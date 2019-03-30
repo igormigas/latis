@@ -36,7 +36,7 @@ module.exports = {
     path: path.resolve(ROOT, dirDistribution),
     filename: '[name].js',
     publicPath: '/',
-    library: 'latis',
+    library: '',
     libraryTarget: 'umd',
     libraryExport: 'default',
   },
@@ -127,6 +127,7 @@ module.exports = {
   optimization: {
     minimizer: [
       new OptimizeCSSAssetsPlugin({}),
+      new UglifyJsPlugin(),
     ],
   },
   stats: {

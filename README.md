@@ -1,6 +1,6 @@
 # Latis
 ---
-Latis is a small Javascript library which helps in creating gallery layout filled with images or block elements, providing horizontal or vertical priority.
+Latis is a small Javascript library which spreads given elements into rows, creating a nice looking layout with horizontal priority.
 
 ##### Notice
 The library is in a very early stage of development and as for now remains author's playground for educational purposes. Although it is not fully optimized and not all of the functions may work properly, feel free to try it, use it or give a feedback.
@@ -19,30 +19,38 @@ The library is in a very early stage of development and as for now remains autho
 - callbacks
 
 ## Installation
+```npm
+npm install latis
+```
+```link
+sdsdf
+```
+
+## Basic usage
+Latis is designed to work nearly out of the box, without diving into available settings. However you need to follow some basic rules to initialize the process.
+
 HTML (example):
 ```html
-<div class="container" style="position: relative">
-  <div class="item">
+<div class="latis">
+  <div class="latis-item">
     <a href="#">
-      <img class="cover" style="height: 100%" src="default.jpg" />
+      <img class="latis-image" src="default.jpg" />
     </a>
   </div>
-  <div class="item" style="width:200px; height: 100px;">
-    Example content
-    <img alt="Default UI image" src="defaultUIimg.jpg" />
+  <div class="latis-item">
+    <a href="#">
+      <img class="latis-image" src="image.jpg" />
+    </a>
   </div>
-  <!-- more items -->
+  <!-- more latis-items -->
 </div>
 ```
 JS:
 ```javascript
-var container = document.getElementById('container');
-Latis(container).horizontal({
-	item: '.item',
-	imageClass: '.cover',
-	minWidth: 400,
-	maxRowHeight: 350,
-	gutter: 15,
-	hideOverload: false,
-});
+var container = document.getElementById('latis');
+document.onreadystatechange = () => {
+  if (document.readyState === 'complete') {
+    Latis(container).horizontal();
+  };
+}''
 ```

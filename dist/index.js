@@ -1,1 +1,596 @@
-!function(t,e){if("object"==typeof exports&&"object"==typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n=e();for(var r in n)("object"==typeof exports?exports:t)[r]=n[r]}}(window,function(){return function(n){var r={};function i(t){if(r[t])return r[t].exports;var e=r[t]={i:t,l:!1,exports:{}};return n[t].call(e.exports,e,e.exports,i),e.l=!0,e.exports}return i.m=n,i.c=r,i.d=function(t,e,n){i.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:n})},i.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},i.t=function(e,t){if(1&t&&(e=i(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(i.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var r in e)i.d(n,r,function(t){return e[t]}.bind(null,r));return n},i.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return i.d(e,"a",e),e},i.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},i.p="/",i(i.s=0)}([function(t,e,n){"use strict";function a(t){return function(t){if(Array.isArray(t)){for(var e=0,n=new Array(t.length);e<t.length;e++)n[e]=t[e];return n}}(t)||function(t){if(Symbol.iterator in Object(t)||"[object Arguments]"===Object.prototype.toString.call(t))return Array.from(t)}(t)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance")}()}n.r(e);function r(t,e){var n,r,i=2<arguments.length&&void 0!==arguments[2]?arguments[2]:{},o=(3<arguments.length&&void 0!==arguments[3]&&arguments[3],t.current),l=o.childNodes,b={classItem:i.item||".item",classCover:i.coverClass||".cover",minContainerWidth:i.minContainerWidth||400,maxRowHeight:i.maxRowHeight||350,gutter:i.gutter||15,hideOverload:i.hideOverload||!1,minColumnWidth:i.minColumnWidth||200},O={containerWidth:o.offsetWidth,finalContainerHeight:0};function W(t){for(var e=b.gutter,n=O.containerWidth-(t.length-1)*e,r=0,i=0,o=t.length;i<o;i++)r+=t[i].GH.ratio;return 0<r?n/r:0}function w(t,e,n,r,i){t.GH.width=e,t.GH.height=n,t.GH.offsetTop=r,t.GH.offsetLeft=i}function f(t){return t+"px"}function x(t,e){return t*e}function j(t,e){return t/e}return!1===["absolute","fixed","relative"].includes(o.style.position)&&(o.style.position="relative"),n="horizontal"==e?function(t){for(var e,n=O.containerWidth,r=b.minContainerWidth,i=b.maxRowHeight,o=b.gutter,f=b.hideOverload,a=0,l=0,u=0,c=1,h=t.length;c<=h;c++){if(e=t.slice(0,c),n<r){var d=e[0];w(d,n,j(n,d.GH.ratio),l,0),a=d.GH.originalHeight}else{if(!((a=W(e))<i))continue;for(var s=0,v=0,g=t.length;v<g;v++){var p=t[v];w(p,x(a,p.GH.ratio),a,l,s),s+=p.GH.width+o}}l+=a+o,t=t.slice(c),h=t.length,c=0}if(0<t.length)if(1==f)t.each(function(t,e){$(e).hide()});else{for(var y=0,m=t.length;y<m;y++){var H=t[y];w(H,x(i,H.GH.ratio),i,l,u),u+=H.width+o}l+=i}O.finalContainerHeight=l}:function(t){for(var e=O.containerWidth,n=b.minColumnWidth,r=b.gutter,i=Math.floor((e+r)/(n+r)),o=(e-(i-1)*r)/i,f=[],a=0;a<i;a++)f[a]={leftOffset:a*(o+r),currentTopOffset:0};for(var l=0,u=t.length;l<u;l++){var c=t[l],h=v(),d=j(o,c.GH.ratio);w(c,o,d,f[h].currentTopOffset,f[h].leftOffset),s=d+r,f[h].currentTopOffset+=s}var s;function v(){var n=0,r=f[0].currentTopOffset;return f.forEach(function(t,e){t.currentTopOffset<r&&(n=e,r=t.currentTopOffset)}),n}O.finalContainerHeight=(g=0,f.forEach(function(t,e){t.currentTopOffset>g&&(g=t.currentTopOffset)}),g);var g},function(){var t=!0,e=!1,n=void 0;try{for(var r,i=l[Symbol.iterator]();!(t=(r=i.next()).done);t=!0){var o=r.value,f={},a=o.querySelector("img.cover");f.originalHeight=null!==a?(f.originalWidth=a.naturalWidth,a.naturalHeight):(f.originalWidth=o.clientWidth,o.clientHeight),f.ratio=f.originalWidth/f.originalHeight,o.GH=f}}catch(t){e=!0,n=t}finally{try{t||null==i.return||i.return()}finally{if(e)throw n}}}(),n(a(l)),r=O.finalContainerHeight,o.style.height=f(Math.ceil(r)),function(t){for(var e=0;e<t.length;++e){var n=t[e].style,r=t[e].GH;n.position="absolute",n.width=f(r.width),n.height=f(r.height),n.top=f(r.offsetTop),n.left=f(r.offsetLeft)}}(l),{horizontal:function(){return w},vertical:function(){}}}e.default=function(e){var n=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{};return{horizontal:function(){var t=0<arguments.length&&void 0!==arguments[0]?arguments[0]:{};r(e,"horizontal",t,n)},vertical:function(){var t=0<arguments.length&&void 0!==arguments[0]?arguments[0]:{};r(e,"vertical",t,n)}}}}]).default});
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["latis"] = factory();
+	else
+		root["latis"] = factory();
+})(window, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+
+// CONCATENATED MODULE: ./src/modules/buildItemDataStructure.js
+/* harmony default export */ var buildItemDataStructure = (function (array, settings) {
+  if (!array.length) {
+    return false;
+  }
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = array[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var item = _step.value;
+
+      if (!item instanceof HTMLElement) {
+        continue;
+      }
+
+      var params = {};
+      var classList = getElementClassList(item);
+      var $image = item.querySelector('img.' + settings.imageSelector);
+      params.coverImage = $image;
+      params.type = $image ? 'image' : 'block';
+      params.display = !classList.includes(settings.hiddenSelector);
+      params.stretched = params.type !== 'image' || params.type === 'image' && classList.includes(settings.stretchedSelector) && !settings.ignoreImageStretching;
+      params.lazy = classList.includes(settings.lazySelector);
+      console.log(item);
+
+      if ($image !== null) {
+        //console.dir($image);
+        params.originalWidth = $image.naturalWidth;
+        params.originalHeight = $image.naturalHeight;
+      } else {
+        params.originalWidth = item.clientWidth;
+        params.originalHeight = item.clientHeight;
+      }
+
+      params.ratio = params.originalWidth / params.originalHeight;
+      item.latis = params;
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return != null) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return array;
+});
+
+function getElementClassList(ref) {
+  var array = [];
+
+  if (ref.classList) {
+    var classList = ref.classList;
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = classList[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var x = _step2.value;
+        array.push(x);
+      }
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
+          _iterator2.return();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
+  }
+
+  return array;
+}
+// CONCATENATED MODULE: ./src/modules/horizontalRowContainer.js
+/* harmony default export */ var horizontalRowContainer = (function () {
+  var items = [];
+  var ratio = 0;
+
+  function put(elem) {
+    items.push(elem);
+    recalculateRatio();
+  }
+
+  function get(pos) {
+    if (pos !== undefined) {
+      return items[pos] || null;
+    }
+
+    return items;
+  }
+
+  function clear() {
+    items = [];
+    ratio = 0;
+  }
+
+  function count() {
+    return items.length;
+  }
+
+  function isEmpty() {
+    if (items.length > 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function isFilled() {
+    return !isEmpty();
+  }
+  /*
+  function getRowHeight(width, gutterWidth = 0) {
+    let workWidth = width - (count() - 1) * gutterWidth;
+    return width ? workWidth / ratio : false;
+  }*/
+
+
+  function getRowWidth(height) {
+    return height ? height * ratio : false;
+  }
+
+  function getContentRatio() {
+    return ratio;
+  }
+
+  function recalculateRatio() {
+    var sumRatio = 0;
+    items.forEach(function (item) {
+      sumRatio += item.latis.ratio;
+    });
+    ratio = sumRatio;
+  }
+
+  return {
+    put: put,
+    get: get,
+    clear: clear,
+    count: count,
+    isEmpty: isEmpty,
+    isFilled: isFilled,
+    getRowWidth: getRowWidth,
+    getContentRatio: getContentRatio
+  };
+});
+// CONCATENATED MODULE: ./src/modules/functions.js
+function getWidthByHeight(dim, ratio) {
+  return dim * ratio;
+}
+function getHeightByWidth(dim, ratio) {
+  return dim / ratio;
+}
+function px(val) {
+  return val + 'px';
+}
+// CONCATENATED MODULE: ./src/modules/horizontalRowController.js
+
+
+/* harmony default export */ var horizontalRowController = (function (Settings) {
+  var Container = horizontalRowContainer();
+  var itemsCached = [];
+  var containerWidth;
+  var currentOffsetTop = 0;
+
+  function add(ref) {
+    if (ref.latis.display === false) {
+      ref.style.display = 'none';
+      return;
+    }
+
+    if (ref.latis.stretched) {
+      if (ref.latis.lazy && Container.isFilled()) {
+        itemsCached.push(ref);
+      } else {
+        enterOverload();
+        itemsCached.push(ref);
+        pushCachedBlocks();
+      }
+    } else {
+      Container.put(ref);
+
+      if (getRowHeight() < Settings.maxRowHeight) {
+        enter();
+        pushCachedBlocks();
+      }
+    }
+  }
+
+  function enter() {
+    if (Container.isFilled()) {
+      buildRow();
+      increaseOffsetTop(getRowHeight());
+      Container.clear();
+    }
+  }
+
+  function enterOverload() {
+    if (Container.isFilled()) {
+      var finalHeight = buildRow(Settings.maxRowHeight, Settings.overloadBehaviour);
+      increaseOffsetTop(finalHeight);
+      Container.clear();
+      pushCachedBlocks();
+    }
+  }
+
+  function forceEnter() {
+    enter();
+  }
+
+  function buildRow(height) {
+    var align = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'auto';
+    var rowHeight = 0;
+
+    if (Container.isFilled()) {
+      var currentOffsetLeft = 0;
+      rowHeight = getRowHeight();
+
+      if (align !== 'auto' && height) {
+        rowHeight = height;
+        var rowWidth = getRowWidth(rowHeight);
+
+        switch (align) {
+          case 'right':
+            currentOffsetLeft = containerWidth - rowWidth;
+            break;
+
+          case 'center':
+            currentOffsetLeft = (containerWidth - rowWidth) / 2;
+            break;
+        }
+      }
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = Container.get()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var item = _step.value;
+          var itemWidth = getWidthByHeight(rowHeight, item.latis.ratio);
+          setItemParams(item, itemWidth, rowHeight, currentOffsetTop, currentOffsetLeft);
+          currentOffsetLeft += itemWidth + Settings.gutter;
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return != null) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+
+    return rowHeight;
+  }
+
+  function pushCachedBlocks() {
+    if (itemsCached.length > 0) {
+      itemsCached.forEach(function (item) {
+        var rowHeight = containerWidth / item.latis.ratio;
+        setItemParams(item, containerWidth, rowHeight, currentOffsetTop, 0);
+        increaseOffsetTop(rowHeight);
+      });
+    }
+
+    itemsCached = [];
+  }
+
+  function getRowHeight() {
+    var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : containerWidth;
+    var len = Container.count();
+    var ratio = Container.getContentRatio();
+    var workWidth = width - (len - 1) * Settings.gutter;
+    return ratio > 0 ? workWidth / ratio : null;
+  }
+
+  function getRowWidth(height) {
+    var len = Container.count();
+    var ratio = Container.getContentRatio();
+    return ratio > 0 ? height * ratio + (len - 1) * Settings.gutter : null;
+  }
+
+  function clear() {
+    Container.clear();
+  }
+
+  function isEmpty() {
+    return Container.isEmpty();
+  }
+
+  function setItemParams(item, width, height, offTop, offLeft) {
+    item.latis.width = width;
+    item.latis.height = height;
+    item.latis.offsetTop = offTop;
+    item.latis.offsetLeft = offLeft;
+  }
+
+  function increaseOffsetTop(height) {
+    currentOffsetTop += height + Settings.gutter;
+  }
+
+  function get(pos) {
+    if (pos !== undefined) {
+      return items[pos] || null;
+    }
+
+    return items;
+  }
+
+  function setWidth(value) {
+    containerWidth = parseInt(value, 10);
+    return containerWidth;
+  }
+
+  function getOffsetTop() {
+    return currentOffsetTop;
+  }
+
+  function getFinalHeight() {
+    return currentOffsetTop - Settings.gutter;
+  }
+
+  return {
+    add: add,
+    clear: clear,
+    get: get,
+    forceEnter: forceEnter,
+    enterOverload: enterOverload,
+    setWidth: setWidth,
+    getRowHeight: getRowHeight,
+    getOffsetTop: getOffsetTop,
+    getFinalHeight: getFinalHeight,
+    isEmpty: isEmpty
+  };
+});
+// CONCATENATED MODULE: ./src/latis.js
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+/*
+ * Grid-Horizontal v0.9.2
+ * test
+ */
+
+
+
+/* harmony default export */ var latis = (function (_reference, _callback) {
+  return {
+    horizontal: function horizontal() {
+      var _settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      Grid(_reference, 'horizontal', _settings, _callback);
+    },
+    vertical: function vertical() {
+      var _settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      Grid(_reference, 'vertical', _settings, _callback);
+    }
+  };
+});
+
+function Grid(_reference, _method) {
+  var _settings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+  var _callback = arguments.length > 3 ? arguments[3] : undefined;
+
+  var $container = _reference;
+  var settings = {
+    maxRowHeight: _settings.maxRowHeight || 350,
+    minContainerWidth: _settings.minContainerWidth || 400,
+    gutter: _settings.gutter || 15,
+    overloadBehaviour: _settings.overloadBehaviour || 'left',
+    itemSelector: _settings.itemSelector || 'latis-item',
+    imageSelector: _settings.imageSelector || 'latis-image',
+    stretchedSelector: _settings.stretchedSelector || 'stretched',
+    lazySelector: _settings.lazySelector || 'lazy',
+    hiddenSelector: _settings.hiddenSelector || 'hidden',
+    ignoreBlocks: _settings.ignoreBlocks || false,
+    ignoreImageStretching: _settings.ignoreImageStretching || false
+  };
+  console.log(settings.stretchedSelector);
+  var state = {
+    containerWidth: $container.offsetWidth,
+    finalContainerHeight: 0,
+    overloadHidden: false
+  };
+  /*if (_method === 'horizontal') {
+    calculateGrid = calculateGridHorizontal;
+  } else {
+    calculateGrid = calculateGridVertical;
+  } */
+  // PROCESS
+
+  var items = buildItemDataStructure(_toConsumableArray($container.children), settings);
+  prepareHtmlEnvironment();
+  calculateGridHorizontal(_toConsumableArray(items));
+  setContainerHeightStyle(state.finalContainerHeight);
+  pushToDOM(items);
+
+  if (typeof _callback === 'function') {
+    _callback();
+  } //
+  // FUNCTIONS
+  //
+
+
+  function prepareHtmlEnvironment() {
+    if (['absolute', 'fixed', 'relative'].includes($container.style.position) === false) {
+      $container.style.position = 'relative';
+    }
+  }
+
+  function calculateGridHorizontal(items) {
+    var containerWidth = state.containerWidth;
+    var Row = horizontalRowController(settings);
+    Row.setWidth(containerWidth);
+
+    for (var i = 0, countItems = items.length; i < countItems; i++) {
+      if (items[i].latis.type !== 'image' && settings.ignoreBlocks) {
+        hide(items[i]);
+        continue;
+      }
+
+      Row.add(items[i]);
+      console.dir(items[i]);
+
+      if (containerWidth < settings.minContainerWidth) {
+        Row.forceEnter();
+      }
+    }
+
+    if (!Row.isEmpty()) {
+      Row.enterOverload();
+    }
+
+    state.finalContainerHeight = Row.getFinalHeight();
+  }
+
+  function setContainerHeightStyle(value) {
+    $container.style.height = px(Math.ceil(value));
+  }
+
+  function pushToDOM(items) {
+    for (var i = 0; i < items.length; ++i) {
+      var item = items[i].style;
+      var lib = items[i].latis;
+      item.position = 'absolute';
+      item.width = px(lib.width);
+      item.height = px(lib.height);
+      item.top = px(lib.offsetTop);
+      item.left = px(lib.offsetLeft);
+    }
+  }
+
+  function hide(ref) {
+    ref.style.display = "none";
+  }
+}
+// CONCATENATED MODULE: ./src/index.js
+
+/* harmony default export */ var src = __webpack_exports__["default"] = (latis);
+
+/***/ })
+/******/ ])["default"];
+});

@@ -3,205 +3,90 @@
  * test
  */
 
- export default function(_reference, _callbacks={}) {
+import buildItemDataStructure from './modules/buildItemDataStructure';
+import horizontalRowController from './modules/horizontalRowController';
+import { px } from './modules/functions';
+
+export default function (_reference, _callback) {
   return {
-    horizontal: (_settings={}) => {
-      Grid(_reference, 'horizontal', _settings, _callbacks);
+    horizontal: (_settings = {}) => {
+      Grid(_reference, 'horizontal', _settings, _callback);
     },
-    vertical: (_settings={}) => {
-      Grid(_reference, 'vertical', _settings, _callbacks);
-    }
-  }
+    vertical: (_settings = {}) => {
+      Grid(_reference, 'vertical', _settings, _callback);
+    },
+  };
 }
 
-function Grid(_reference, _method, _settings={}, _callbacks={}) {
-
-  let $container = _reference.current;
-  let items = $container.childNodes;
-  let calculateGrid;
+function Grid(_reference, _method, _settings = {}, _callback) {
+  let $container = _reference;
 
   const settings = {
-    classItem:          _settings.item || '.item',
-    classCover:         _settings.coverClass || '.cover',
-    minContainerWidth:  _settings.minContainerWidth || 400,
-    maxRowHeight:       _settings.maxRowHeight || 350,
-    gutter:             _settings.gutter || 15,
-    hideOverload:       _settings.hideOverload || false,
-    minColumnWidth:     _settings.minColumnWidth || 200,
-  }
+    maxRowHeight: _settings.maxRowHeight || 350,
+    minContainerWidth: _settings.minContainerWidth || 400,
+    gutter: _settings.gutter || 15,
+    overloadBehaviour: _settings.overloadBehaviour || 'left',
+
+    itemSelector: _settings.itemSelector || 'latis-item',
+    imageSelector: _settings.imageSelector || 'latis-image',
+    stretchedSelector: _settings.stretchedSelector || 'stretched',
+    lazySelector: _settings.lazySelector || 'lazy',
+    hiddenSelector: _settings.hiddenSelector || 'hidden',
+
+    ignoreBlocks: _settings.ignoreBlocks || false,
+    ignoreImageStretching: _settings.ignoreImageStretching || false,
+  };
 
   const state = {
     containerWidth: $container.offsetWidth,
     finalContainerHeight: 0,
-  }
-
-  // PREPARATION
-
-  if(['absolute', 'fixed', 'relative'].includes($container.style.position) === false ) {
-    $container.style.position = 'relative';
-  }
-  if (_method == 'horizontal') {
-    calculateGrid = calculateGridHorizontal;
-  } else {
-    calculateGrid = calculateGridVertical;
-  }
+    overloadHidden: false,
+  };
 
   // PROCESS
 
-  buildItemDataStructure();
-  calculateGrid([...items]);
+  let items = buildItemDataStructure([...$container.children], settings);
+  prepareHtmlEnvironment();
+  calculateGridHorizontal([...items]);
   setContainerHeightStyle(state.finalContainerHeight);
   pushToDOM(items);
+
+  if (typeof _callback === 'function') {
+    _callback();
+  }
 
   //
   // FUNCTIONS
   //
 
-  // Define size and ratio of each element
-  function buildItemDataStructure() {
-    for(let item of items) {
-      let params = {};
-      const $image = item.querySelector('img.cover');
-
-      if ($image !== null) {
-        params.originalWidth = $image.naturalWidth;
-        params.originalHeight = $image.naturalHeight;
-      } else {
-        params.originalWidth = item.clientWidth;
-        params.originalHeight = item.clientHeight;
-      }
-      params.ratio = params.originalWidth/params.originalHeight;
-      item.latis = params;
+  function prepareHtmlEnvironment() {
+    if (['absolute', 'fixed', 'relative'].includes($container.style.position) === false) {
+      $container.style.position = 'relative';
     }
   }
 
-  function calculateGridVertical(array) {
+  function calculateGridHorizontal(items) {
     const { containerWidth } = state;
-    const { minColumnWidth, gutter } = settings;
 
-    // Calculate number of columns within the container
-    const calcColumnNumber = Math.floor((containerWidth + gutter)/(minColumnWidth + gutter));
-    const calcColumnWidth = (containerWidth - (calcColumnNumber - 1)*gutter) / calcColumnNumber;
-    const columns = [];
-    for (let i=0; i<calcColumnNumber; i++) {
-      columns[i] = {
-        leftOffset: i * (calcColumnWidth + gutter),
-        currentTopOffset: 0,
-      }
-    }
+    const Row = horizontalRowController(settings);
+    Row.setWidth(containerWidth);
 
-    // Calculate positions
-    for(let i=0, countItems = array.length; i < countItems; i++) {
-      const item = array[i];
-      const columnId = getShortestColumnId();
-      const calcItemHeight = getHeightByWidth(calcColumnWidth, item.latis.ratio);
-      setItemParams(
-        item,
-        calcColumnWidth,
-        calcItemHeight,
-        columns[columnId].currentTopOffset,
-        columns[columnId].leftOffset,
-      );
-      increaseColumnTopOffset(columnId, calcItemHeight + gutter);
-    }
-    state.finalContainerHeight = getLongestColumnValue();
-
-    // FUNCTIONS
-
-    function increaseColumnTopOffset(id, value) {
-      columns[id].currentTopOffset += value;
-    }
-
-    function getShortestColumnId() {
-      let id = 0;
-      let offset = columns[0].currentTopOffset;
-      columns.forEach(( col, index ) => {
-        if (col.currentTopOffset < offset) {
-          id = index;
-          offset = col.currentTopOffset;
-        }
-      });
-      return id;
-    }
-
-    function getLongestColumnValue() {
-      let offset = 0;
-      columns.forEach(( col, index ) => {
-        if (col.currentTopOffset > offset) {
-          offset = col.currentTopOffset;
-        }
-      });
-      return offset;
-    }
-  }
-
-  function calculateGridHorizontal(array) {
-    const { containerWidth } = state;
-    const { minContainerWidth, maxRowHeight, gutter, hideOverload } = settings;
-    let subArray;
-    let currentRowHeight = 0, currentOffsetTop = 0, currentOffsetLeft = 0;
-
-    for(let i=1, countItems = array.length; i <= countItems; i++) {
-      subArray = array.slice(0,i);
-
-      if(containerWidth < minContainerWidth) {
-        let item = subArray[0];
-        setItemParams(
-          item,
-          containerWidth,
-          getHeightByWidth(containerWidth, item.latis.ratio),
-          currentOffsetTop,
-          0,
-        );
-        currentRowHeight = item.latis.originalHeight;
-      } else if((currentRowHeight=sliceHeightCalc(subArray)) < maxRowHeight) {
-        let currentOffsetLeft = 0;
-
-        for(let i=0, len = array.length; i<len; i++) {
-          let item = array[i];
-          setItemParams(
-            item,
-            getWidthByHeight(currentRowHeight, item.latis.ratio),
-            currentRowHeight,
-            currentOffsetTop,
-            currentOffsetLeft,
-          );
-          currentOffsetLeft += item.latis.width + gutter;
-        }
-      } else {
+    for (let i = 0, countItems = items.length; i < countItems; i++) {
+      if (items[i].latis.type !== 'image' && settings.ignoreBlocks) {
+        hide(items[i]);
         continue;
       }
-
-      currentOffsetTop += currentRowHeight + gutter;
-
-      array = array.slice(i);
-      countItems=array.length;
-      i = 0;
-    }
-
-    if(array.length > 0) {
-
-      if(hideOverload == true) {
-        array.each(function(i,elem) {
-          $(elem).hide();
-        });
-      } else {
-        for(let i=0, len = array.length; i<len; i++) {
-          let item = array[i];
-          setItemParams(
-            item,
-            getWidthByHeight(maxRowHeight, item.latis.ratio),
-            maxRowHeight,
-            currentOffsetTop,
-            currentOffsetLeft,
-          );
-          currentOffsetLeft += item.width + gutter;
-        }
-        currentOffsetTop += maxRowHeight;
+      Row.add(items[i]);
+      console.dir(items[i]);
+      if (containerWidth < settings.minContainerWidth) {
+        Row.forceEnter();
       }
     }
+    if (!Row.isEmpty()) {
+      Row.enterOverload();
+    }
 
-    state.finalContainerHeight = currentOffsetTop;
+    state.finalContainerHeight = Row.getFinalHeight();
   }
 
   function setContainerHeightStyle(value) {
@@ -209,7 +94,7 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
   }
 
   function pushToDOM(items) {
-    for(let i=0;i<items.length;++i) {
+    for (let i = 0; i < items.length; ++i) {
       let item = items[i].style;
       let lib = items[i].latis;
       item.position = 'absolute';
@@ -220,49 +105,7 @@ function Grid(_reference, _method, _settings={}, _callbacks={}) {
     }
   }
 
-  function sliceHeightCalc(array) {
-    const { gutter } = settings;
-    const { containerWidth } = state;
-    const workWidth = containerWidth - (array.length-1)*gutter;
-
-    let sumRatio = 0;
-    for (let i=0,len=array.length; i<len;i++) {
-      sumRatio += array[i].latis.ratio;
-    }
-
-    return (sumRatio > 0) ? workWidth/sumRatio : 0;
-  }
-
-  function setItemParams(item, width, height, offTop, offLeft) {
-    item.latis.width = width;
-    item.latis.height = height;
-    item.latis.offsetTop = offTop;
-    item.latis.offsetLeft = offLeft;
-  }
-
-  function px(val) {
-    return val + 'px';
-  }
-
-  function increaseCurrentOffsetTop(value) {
-    currentOffsetTop += value;
-  }
-
-  function getWidthByHeight(dim, ratio) {
-    return dim * ratio;
-  }
-
-  function getHeightByWidth(dim, ratio) {
-    return dim / ratio;
-  }
-
-  return {
-    horizontal: () => {
-      const a = setItemParams;
-      return a;
-    },
-    vertical: () => {
-
-    }
+  function hide(ref) {
+    ref.style.display = "none";
   }
 }

@@ -1,3 +1,3 @@
-import defaultExport from './grid';
+import defaultExport from './latis';
 
 export default defaultExport;
