@@ -18,15 +18,21 @@ export default function (array, settings) {
     params.type = $image ? 'image' : 'block';
 
     params.display = !classList.includes(settings.hiddenSelector);
-    params.stretched = params.type !== 'image' || (params.type === 'image' && classList.includes(settings.stretchedSelector) && !settings.ignoreImageStretching);
+    params.stretched =
+      params.type !== 'image'
+      || (
+        params.type === 'image'
+        && classList.includes(settings.stretchedSelector)
+        && !settings.ignoreImageStretching
+      );
     params.lazy = classList.includes(settings.lazySelector);
 
     if ($image !== null) {
       params.originalWidth = $image.naturalWidth;
       params.originalHeight = $image.naturalHeight;
-      $image.style.display = "block";
-      $image.style.width = "100%";
-      $image.style.maxHeight = "100%";
+      $image.style.display = 'block';
+      $image.style.width = '100%';
+      $image.style.maxHeight = '100%';
     } else {
       params.originalWidth = item.clientWidth;
       params.originalHeight = item.clientHeight;

@@ -119,6 +119,7 @@ __webpack_require__.r(__webpack_exports__);
         continue;
       }
 
+      item.style.boxSizing = 'border-box';
       var params = {};
       var classList = getElementClassList(item);
       var $image = item.querySelector('img.' + settings.imageSelector);
@@ -127,12 +128,13 @@ __webpack_require__.r(__webpack_exports__);
       params.display = !classList.includes(settings.hiddenSelector);
       params.stretched = params.type !== 'image' || params.type === 'image' && classList.includes(settings.stretchedSelector) && !settings.ignoreImageStretching;
       params.lazy = classList.includes(settings.lazySelector);
-      console.log(item);
 
       if ($image !== null) {
-        //console.dir($image);
         params.originalWidth = $image.naturalWidth;
         params.originalHeight = $image.naturalHeight;
+        $image.style.display = 'block';
+        $image.style.width = '100%';
+        $image.style.maxHeight = '100%';
       } else {
         params.originalWidth = item.clientWidth;
         params.originalHeight = item.clientHeight;
@@ -509,18 +511,11 @@ function Grid(_reference, _method) {
     ignoreBlocks: _settings.ignoreBlocks || false,
     ignoreImageStretching: _settings.ignoreImageStretching || false
   };
-  console.log(settings.stretchedSelector);
   var state = {
     containerWidth: $container.offsetWidth,
     finalContainerHeight: 0,
     overloadHidden: false
-  };
-  /*if (_method === 'horizontal') {
-    calculateGrid = calculateGridHorizontal;
-  } else {
-    calculateGrid = calculateGridVertical;
-  } */
-  // PROCESS
+  }; // PROCESS
 
   var items = buildItemDataStructure(_toConsumableArray($container.children), settings);
   prepareHtmlEnvironment();
@@ -553,7 +548,6 @@ function Grid(_reference, _method) {
       }
 
       Row.add(items[i]);
-      console.dir(items[i]);
 
       if (containerWidth < settings.minContainerWidth) {
         Row.forceEnter();
@@ -584,7 +578,7 @@ function Grid(_reference, _method) {
   }
 
   function hide(ref) {
-    ref.style.display = "none";
+    ref.style.display = 'none';
   }
 }
 // CONCATENATED MODULE: ./src/index.js

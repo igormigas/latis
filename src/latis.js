@@ -77,7 +77,6 @@ function Grid(_reference, _method, _settings = {}, _callback) {
         continue;
       }
       Row.add(items[i]);
-      console.dir(items[i]);
       if (containerWidth < settings.minContainerWidth) {
         Row.forceEnter();
       }
@@ -106,6 +105,6 @@ function Grid(_reference, _method, _settings = {}, _callback) {
   }
 
   function hide(ref) {
-    ref.style.display = "none";
+    ref.style.display = 'none';
   }
 }
