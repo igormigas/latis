@@ -1,6 +1,6 @@
 /*
- * Grid-Horizontal v0.9.2
- * test
+ * Latis
+ * v0.2.2
  */
 
 import buildItemDataStructure from './modules/buildItemDataStructure';
@@ -72,12 +72,12 @@ function Grid(_reference, _method, _settings = {}, _callback) {
     Row.setWidth(containerWidth);
 
     for (let i = 0, countItems = items.length; i < countItems; i++) {
-      if (items[i].latis.type !== 'image' && settings.ignoreBlocks) {
+      let result = Row.add(items[i]);
+      if (!result) {
         hide(items[i]);
         continue;
       }
-      Row.add(items[i]);
-      if (containerWidth < settings.minContainerWidth) {
+      if (result && containerWidth < settings.minContainerWidth) {
         Row.forceEnter();
       }
     }

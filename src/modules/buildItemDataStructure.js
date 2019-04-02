@@ -3,15 +3,21 @@ export default function (array, settings) {
     return false;
   }
 
-  for (let item of array) {
+  const newArray = [];
+  for (let [key, item] of array.entries()) {
     if (!item instanceof HTMLElement) {
       continue;
     }
 
-    item.style.boxSizing = 'border-box';
+    const classList = getElementClassList(item);
+    if (classList.includes(settings.itemSelector)) {
+      newArray.push(item);
+    } else {
+      continue;
+    }
 
     let params = {};
-    const classList = getElementClassList(item);
+
     const $image = item.querySelector('img.' + settings.imageSelector);
     params.coverImage = $image;
 
@@ -39,8 +45,10 @@ export default function (array, settings) {
     }
     params.ratio = params.originalWidth / params.originalHeight;
     item.latis = params;
+
+    item.style.boxSizing = 'border-box';
   }
-  return array;
+  return newArray;
 }
 
 function getElementClassList(ref) {

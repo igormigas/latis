@@ -11,8 +11,10 @@ export default function (Settings) {
 
   function add(ref) {
     if (ref.latis.display === false) {
-      ref.style.display = 'none';
-      return;
+      return false;
+    }
+    if (ref.latis.type !== 'image' && Settings.ignoreBlocks) {
+      return false;
     }
 
     if (ref.latis.stretched) {
@@ -30,6 +32,7 @@ export default function (Settings) {
         pushCachedBlocks();
       }
     }
+    return true;
   }
 
   function enter() {
@@ -101,8 +104,8 @@ export default function (Settings) {
         );
         increaseOffsetTop(rowHeight);
       });
+      itemsCached = [];
     }
-    itemsCached = [];
   }
 
   function getRowHeight(width = containerWidth) {
