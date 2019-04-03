@@ -1,6 +1,7 @@
 # Latis
----
+
 ![npm](https://img.shields.io/npm/v/latis.svg?color=%237fa68e)
+
 Latis is a small Javascript library which spreads given elements into rows, creating a nice looking layout with horizontal priority.
 
 
@@ -12,7 +13,7 @@ The library is in an early stage of development. Although it is not fully optimi
 All images used in previews are taken from pexels.com, a free stock photos library.
 
 ## Current features
----
+
 - creating grid of elements spreaded into rows of variable heights
 - internal gutters
 - overload content (managing elements which cannot form proper row)
@@ -20,13 +21,13 @@ All images used in previews are taken from pexels.com, a free stock photos libra
 - 'onReady' callback
 
 ## Installation
----
+
 ```bash
 $ npm install latis
 ```
 
 ## Usage
----
+
 Latis is designed to work nearly out of the box, without diving into available settings. However you need to follow some basic rules to initialize the process.
 
 Let's build a simple container-items structure with some Javasciript.
@@ -50,6 +51,8 @@ HTML (example):
 
 JS:
 ```javascript
+import Latis from 'latis';
+
 var container = document.getElementById('latis');
 document.onreadystatechange = () => {
   if (document.readyState === 'complete') {
@@ -123,7 +126,7 @@ Lazy blocks are the same stretched blocks as above, with one difference: they wa
 Please be aware that this allows following regular items to go ahead in layout hierarchy.
 
 ## Settings
----
+
 #### Common
 ###### `maxRowHeight`: integer
 Defines maximal row height for calculation.
@@ -154,5 +157,5 @@ If true, excludes and hides all block items.
 If true, prevents blocks filled with cover image from stretching. Such elements become regular latis items with cover image.
 
 ## License
----
+
 Latis is MIT licensed.
