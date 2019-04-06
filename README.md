@@ -5,7 +5,7 @@
 Latis is a small Javascript library which spreads given elements into rows, creating a nice looking layout with horizontal priority.
 
 
-![Grid Horizontal Demo Image](http://igor.migasiewicz.pl/jpg/gh_git1.jpg)
+![Grid Horizontal Demo Image](http://igor.migasiewicz.pl/latis/promo/Latis_CoverExample.jpg)
 
 ##### Notice
 The library is in an early stage of development. Although it is not fully optimized, feel free to try it, use it or give a feedback. Be aware that, until the script reaches stable release, any interface element may change in next versions without backward compatibility.
