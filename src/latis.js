@@ -1,6 +1,6 @@
 /*
  * Latis
- * v0.2.2
+ * v0.2.4
  */
 
 import buildItemDataStructure from './modules/buildItemDataStructure';
@@ -12,14 +12,12 @@ export default function (_reference, _callback) {
     horizontal: (_settings = {}) => {
       Grid(_reference, 'horizontal', _settings, _callback);
     },
-    vertical: (_settings = {}) => {
-      Grid(_reference, 'vertical', _settings, _callback);
-    },
   };
 }
 
 function Grid(_reference, _method, _settings = {}, _callback) {
-  let $container = _reference;
+  const $container = _reference;
+  const itemsRefs = [...$container.children];
 
   const settings = {
     maxRowHeight: _settings.maxRowHeight || 350,
@@ -40,17 +38,26 @@ function Grid(_reference, _method, _settings = {}, _callback) {
   const state = {
     containerWidth: $container.offsetWidth,
     finalContainerHeight: 0,
-    overloadHidden: false,
   };
 
+  //
   // PROCESS
+  //
+  // Todo:
+  // - redesign process flow
+  // - export some parts to external modules
+  // - optimize and split tasks
 
-  let items = buildItemDataStructure([...$container.children], settings);
+  let [items, deniedItems] = buildItemDataStructure(itemsRefs, settings, state.containerWidth);
   prepareHtmlEnvironment();
+  hideItems(deniedItems);
   calculateGridHorizontal([...items]);
   setContainerHeightStyle(state.finalContainerHeight);
   pushToDOM(items);
 
+  //
+  // CALLBACK
+  //
   if (typeof _callback === 'function') {
     _callback();
   }
@@ -81,10 +88,7 @@ function Grid(_reference, _method, _settings = {}, _callback) {
         Row.forceEnter();
       }
     }
-    if (!Row.isEmpty()) {
-      Row.enterOverload();
-    }
-
+    Row.enterOverload();
     state.finalContainerHeight = Row.getFinalHeight();
   }
 
@@ -93,18 +97,22 @@ function Grid(_reference, _method, _settings = {}, _callback) {
   }
 
   function pushToDOM(items) {
-    for (let i = 0; i < items.length; ++i) {
-      let item = items[i].style;
-      let lib = items[i].latis;
-      item.position = 'absolute';
-      item.width = px(lib.width);
-      item.height = px(lib.height);
-      item.top = px(lib.offsetTop);
-      item.left = px(lib.offsetLeft);
-    }
+    items.forEach(item => {
+      const css = item.style;
+      const params = item.latis;
+      //css.position = 'absolute';
+      css.width = px(params.width);
+      css.height = px(params.height);
+      css.top = px(params.offsetTop);
+      css.left = px(params.offsetLeft);
+    });
   }
 
   function hide(ref) {
     ref.style.display = 'none';
+  }
+
+  function hideItems(array) {
+    array.forEach(ref => hide(ref));
   }
 }

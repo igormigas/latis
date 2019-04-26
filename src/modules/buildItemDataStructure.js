@@ -1,63 +1,72 @@
-export default function (array, settings) {
+export default function (array, settings, containerWidth) {
   if (!array.length) {
     return false;
   }
 
-  const newArray = [];
-  for (let [key, item] of array.entries()) {
+  const acceptedArray = [];
+  const deniedArray = [];
+
+  for (let item of array) {
     if (!item instanceof HTMLElement) {
       continue;
     }
-
-    const classList = getElementClassList(item);
-    if (classList.includes(settings.itemSelector)) {
-      newArray.push(item);
+    if (item.classList.contains(settings.itemSelector)) {
+      acceptedArray.push(item);
     } else {
+      deniedArray.push(item);
       continue;
     }
 
-    let params = {};
+    const params = {};
 
-    const $image = item.querySelector('img.' + settings.imageSelector);
-    params.coverImage = $image;
+    // Define item position as absolute right now
+    // to prevent collapsing margin issue
+    item.style.position = 'absolute';
+    item.style.boxSizing = 'border-box';
 
-    params.type = $image ? 'image' : 'block';
+    params.nodeType = item.nodeName;
+    params.display = !item.classList.contains(settings.hiddenSelector);
+    params.stretched = item.classList.contains(settings.stretchedSelector);
+    params.lazy = item.classList.contains(settings.lazySelector);
 
-    params.display = !classList.includes(settings.hiddenSelector);
-    params.stretched =
-      params.type !== 'image'
-      || (
-        params.type === 'image'
-        && classList.includes(settings.stretchedSelector)
-        && !settings.ignoreImageStretching
-      );
-    params.lazy = classList.includes(settings.lazySelector);
+    let reference = item.querySelector('img.' + settings.imageSelector);
+    if (reference) {
+      params.coverImage = reference;
+    } else if (item.nodeName === 'IMG') {
+      params.coverImage = item;
+    }
 
-    if ($image !== null) {
-      params.originalWidth = $image.naturalWidth;
-      params.originalHeight = $image.naturalHeight;
-      $image.style.display = 'block';
-      $image.style.width = '100%';
-      $image.style.maxHeight = '100%';
+    // Define item type based on cover image existence
+    if (params.coverImage instanceof HTMLElement) {
+      params.scriptType = 'image';
+      const $img = params.coverImage;
+      params.originalWidth = $img.naturalWidth;
+      params.originalHeight = $img.naturalHeight;
+
+      // Cover image style changes should be moved to different module
+      // Todo with infinite scroll functionality
+      $img.style.display = 'block';
+      $img.style.width = '100%';
+      $img.style.maxHeight = '100%';
     } else {
-      params.originalWidth = item.clientWidth;
-      params.originalHeight = item.clientHeight;
+      params.scriptType = 'block';
+      params.originalWidth = parseInt(item.style.width, 10) || containerWidth;
+      params.originalHeight = parseInt(item.style.height, 10) || item.scrollHeight;
+
+      // Force block without full dimension set
+      // to be stretch
+      if (!item.style.width || !item.style.height) {
+        params.stretched = true;
+      }
     }
     params.ratio = params.originalWidth / params.originalHeight;
+
+    // Apply new params to node element
     item.latis = params;
-
-    item.style.boxSizing = 'border-box';
   }
-  return newArray;
-}
 
-function getElementClassList(ref) {
-  const array = [];
-  if (ref.classList) {
-    const classList = ref.classList;
-    for (let x of classList) {
-      array.push(x);
-    }
-  }
-  return array;
+  return [
+    acceptedArray,
+    deniedArray,
+  ];
 }

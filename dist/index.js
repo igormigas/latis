@@ -102,11 +102,13 @@ return /******/ (function(modules) { // webpackBootstrap
 __webpack_require__.r(__webpack_exports__);
 
 // CONCATENATED MODULE: ./src/modules/buildItemDataStructure.js
-/* harmony default export */ var buildItemDataStructure = (function (array, settings) {
+/* harmony default export */ var buildItemDataStructure = (function (array, settings, containerWidth) {
   if (!array.length) {
     return false;
   }
 
+  var acceptedArray = [];
+  var deniedArray = [];
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
   var _iteratorError = undefined;
@@ -119,28 +121,54 @@ __webpack_require__.r(__webpack_exports__);
         continue;
       }
 
-      item.style.boxSizing = 'border-box';
-      var params = {};
-      var classList = getElementClassList(item);
-      var $image = item.querySelector('img.' + settings.imageSelector);
-      params.coverImage = $image;
-      params.type = $image ? 'image' : 'block';
-      params.display = !classList.includes(settings.hiddenSelector);
-      params.stretched = params.type !== 'image' || params.type === 'image' && classList.includes(settings.stretchedSelector) && !settings.ignoreImageStretching;
-      params.lazy = classList.includes(settings.lazySelector);
-
-      if ($image !== null) {
-        params.originalWidth = $image.naturalWidth;
-        params.originalHeight = $image.naturalHeight;
-        $image.style.display = 'block';
-        $image.style.width = '100%';
-        $image.style.maxHeight = '100%';
+      if (item.classList.contains(settings.itemSelector)) {
+        acceptedArray.push(item);
       } else {
-        params.originalWidth = item.clientWidth;
-        params.originalHeight = item.clientHeight;
+        deniedArray.push(item);
+        continue;
       }
 
-      params.ratio = params.originalWidth / params.originalHeight;
+      var params = {}; // Define item position as absolute right now
+      // to prevent collapsing margin issue
+
+      item.style.position = 'absolute';
+      item.style.boxSizing = 'border-box';
+      params.nodeType = item.nodeName;
+      params.display = !item.classList.contains(settings.hiddenSelector);
+      params.stretched = item.classList.contains(settings.stretchedSelector);
+      params.lazy = item.classList.contains(settings.lazySelector);
+      var reference = item.querySelector('img.' + settings.imageSelector);
+
+      if (reference) {
+        params.coverImage = reference;
+      } else if (item.nodeName === 'IMG') {
+        params.coverImage = item;
+      } // Define item type based on cover image existence
+
+
+      if (params.coverImage instanceof HTMLElement) {
+        params.scriptType = 'image';
+        var $img = params.coverImage;
+        params.originalWidth = $img.naturalWidth;
+        params.originalHeight = $img.naturalHeight; // Cover image style changes should be moved to different module
+        // Todo with infinite scroll functionality
+
+        $img.style.display = 'block';
+        $img.style.width = '100%';
+        $img.style.maxHeight = '100%';
+      } else {
+        params.scriptType = 'block';
+        params.originalWidth = parseInt(item.style.width, 10) || containerWidth;
+        params.originalHeight = parseInt(item.style.height, 10) || item.scrollHeight; // Force block without full dimension set
+        // to be stretch
+
+        if (!item.style.width || !item.style.height) {
+          params.stretched = true;
+        }
+      }
+
+      params.ratio = params.originalWidth / params.originalHeight; // Apply new params to node element
+
       item.latis = params;
     }
   } catch (err) {
@@ -158,45 +186,17 @@ __webpack_require__.r(__webpack_exports__);
     }
   }
 
-  return array;
+  return [acceptedArray, deniedArray];
 });
-
-function getElementClassList(ref) {
-  var array = [];
-
-  if (ref.classList) {
-    var classList = ref.classList;
-    var _iteratorNormalCompletion2 = true;
-    var _didIteratorError2 = false;
-    var _iteratorError2 = undefined;
-
-    try {
-      for (var _iterator2 = classList[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-        var x = _step2.value;
-        array.push(x);
-      }
-    } catch (err) {
-      _didIteratorError2 = true;
-      _iteratorError2 = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
-          _iterator2.return();
-        }
-      } finally {
-        if (_didIteratorError2) {
-          throw _iteratorError2;
-        }
-      }
-    }
-  }
-
-  return array;
-}
 // CONCATENATED MODULE: ./src/modules/horizontalRowContainer.js
 /* harmony default export */ var horizontalRowContainer = (function () {
   var items = [];
   var ratio = 0;
+
+  function clear() {
+    items = [];
+    ratio = 0;
+  }
 
   function put(elem) {
     items.push(elem);
@@ -204,46 +204,15 @@ function getElementClassList(ref) {
   }
 
   function get(pos) {
-    if (pos !== undefined) {
+    if (Number.isInteger(pos)) {
       return items[pos] || null;
     }
 
     return items;
   }
 
-  function clear() {
-    items = [];
-    ratio = 0;
-  }
-
   function count() {
     return items.length;
-  }
-
-  function isEmpty() {
-    if (items.length > 0) {
-      return false;
-    }
-
-    return true;
-  }
-
-  function isFilled() {
-    return !isEmpty();
-  }
-  /*
-  function getRowHeight(width, gutterWidth = 0) {
-    let workWidth = width - (count() - 1) * gutterWidth;
-    return width ? workWidth / ratio : false;
-  }*/
-
-
-  function getRowWidth(height) {
-    return height ? height * ratio : false;
-  }
-
-  function getContentRatio() {
-    return ratio;
   }
 
   function recalculateRatio() {
@@ -254,14 +223,26 @@ function getElementClassList(ref) {
     ratio = sumRatio;
   }
 
+  function isEmpty() {
+    var arr = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : items.length;
+    return !arr;
+  }
+
+  function isFilled() {
+    return !isEmpty();
+  }
+
+  function getContentRatio() {
+    return ratio;
+  }
+
   return {
+    clear: clear,
     put: put,
     get: get,
-    clear: clear,
     count: count,
     isEmpty: isEmpty,
     isFilled: isFilled,
-    getRowWidth: getRowWidth,
     getContentRatio: getContentRatio
   };
 });
@@ -286,26 +267,32 @@ function px(val) {
 
   function add(ref) {
     if (ref.latis.display === false) {
-      ref.style.display = 'none';
-      return;
+      return false;
+    }
+
+    if (ref.latis.scriptType !== 'image' && Settings.ignoreBlocks) {
+      return false;
     }
 
     if (ref.latis.stretched) {
-      if (ref.latis.lazy && Container.isFilled()) {
-        itemsCached.push(ref);
-      } else {
-        enterOverload();
-        itemsCached.push(ref);
-        pushCachedBlocks();
+      itemsCached.push(ref);
+
+      if (!ref.latis.lazy) {
+        if (Container.isFilled()) {
+          enterOverload();
+        } else {
+          pushCachedBlocks();
+        }
       }
     } else {
       Container.put(ref);
 
       if (getRowHeight() < Settings.maxRowHeight) {
         enter();
-        pushCachedBlocks();
       }
     }
+
+    return true;
   }
 
   function enter() {
@@ -314,6 +301,8 @@ function px(val) {
       increaseOffsetTop(getRowHeight());
       Container.clear();
     }
+
+    pushCachedBlocks();
   }
 
   function enterOverload() {
@@ -321,8 +310,9 @@ function px(val) {
       var finalHeight = buildRow(Settings.maxRowHeight, Settings.overloadBehaviour);
       increaseOffsetTop(finalHeight);
       Container.clear();
-      pushCachedBlocks();
     }
+
+    pushCachedBlocks();
   }
 
   function forceEnter() {
@@ -389,9 +379,8 @@ function px(val) {
         setItemParams(item, containerWidth, rowHeight, currentOffsetTop, 0);
         increaseOffsetTop(rowHeight);
       });
+      itemsCached = [];
     }
-
-    itemsCached = [];
   }
 
   function getRowHeight() {
@@ -462,6 +451,14 @@ function px(val) {
   };
 });
 // CONCATENATED MODULE: ./src/latis.js
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -471,8 +468,8 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 /*
- * Grid-Horizontal v0.9.2
- * test
+ * Latis
+ * v0.2.4
  */
 
 
@@ -483,11 +480,6 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       var _settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       Grid(_reference, 'horizontal', _settings, _callback);
-    },
-    vertical: function vertical() {
-      var _settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      Grid(_reference, 'vertical', _settings, _callback);
     }
   };
 });
@@ -498,6 +490,9 @@ function Grid(_reference, _method) {
   var _callback = arguments.length > 3 ? arguments[3] : undefined;
 
   var $container = _reference;
+
+  var itemsRefs = _toConsumableArray($container.children);
+
   var settings = {
     maxRowHeight: _settings.maxRowHeight || 350,
     minContainerWidth: _settings.minContainerWidth || 400,
@@ -513,15 +508,27 @@ function Grid(_reference, _method) {
   };
   var state = {
     containerWidth: $container.offsetWidth,
-    finalContainerHeight: 0,
-    overloadHidden: false
-  }; // PROCESS
+    finalContainerHeight: 0
+  }; //
+  // PROCESS
+  //
+  // Todo:
+  // - redesign process flow
+  // - export some parts to external modules
+  // - optimize and split tasks
 
-  var items = buildItemDataStructure(_toConsumableArray($container.children), settings);
+  var _buildItemDataStructu = buildItemDataStructure(itemsRefs, settings, state.containerWidth),
+      _buildItemDataStructu2 = _slicedToArray(_buildItemDataStructu, 2),
+      items = _buildItemDataStructu2[0],
+      deniedItems = _buildItemDataStructu2[1];
+
   prepareHtmlEnvironment();
+  hideItems(deniedItems);
   calculateGridHorizontal(_toConsumableArray(items));
   setContainerHeightStyle(state.finalContainerHeight);
-  pushToDOM(items);
+  pushToDOM(items); //
+  // CALLBACK
+  //
 
   if (typeof _callback === 'function') {
     _callback();
@@ -542,22 +549,19 @@ function Grid(_reference, _method) {
     Row.setWidth(containerWidth);
 
     for (var i = 0, countItems = items.length; i < countItems; i++) {
-      if (items[i].latis.type !== 'image' && settings.ignoreBlocks) {
+      var result = Row.add(items[i]);
+
+      if (!result) {
         hide(items[i]);
         continue;
       }
 
-      Row.add(items[i]);
-
-      if (containerWidth < settings.minContainerWidth) {
+      if (result && containerWidth < settings.minContainerWidth) {
         Row.forceEnter();
       }
     }
 
-    if (!Row.isEmpty()) {
-      Row.enterOverload();
-    }
-
+    Row.enterOverload();
     state.finalContainerHeight = Row.getFinalHeight();
   }
 
@@ -566,19 +570,25 @@ function Grid(_reference, _method) {
   }
 
   function pushToDOM(items) {
-    for (var i = 0; i < items.length; ++i) {
-      var item = items[i].style;
-      var lib = items[i].latis;
-      item.position = 'absolute';
-      item.width = px(lib.width);
-      item.height = px(lib.height);
-      item.top = px(lib.offsetTop);
-      item.left = px(lib.offsetLeft);
-    }
+    items.forEach(function (item) {
+      var css = item.style;
+      var params = item.latis; //css.position = 'absolute';
+
+      css.width = px(params.width);
+      css.height = px(params.height);
+      css.top = px(params.offsetTop);
+      css.left = px(params.offsetLeft);
+    });
   }
 
   function hide(ref) {
     ref.style.display = 'none';
+  }
+
+  function hideItems(array) {
+    array.forEach(function (ref) {
+      return hide(ref);
+    });
   }
 }
 // CONCATENATED MODULE: ./src/index.js

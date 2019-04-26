@@ -13,23 +13,23 @@ export default function (Settings) {
     if (ref.latis.display === false) {
       return false;
     }
-    if (ref.latis.type !== 'image' && Settings.ignoreBlocks) {
+    if (ref.latis.scriptType !== 'image' && Settings.ignoreBlocks) {
       return false;
     }
 
     if (ref.latis.stretched) {
-      if (ref.latis.lazy && Container.isFilled()) {
-        itemsCached.push(ref);
-      } else {
-        enterOverload();
-        itemsCached.push(ref);
-        pushCachedBlocks();
+      itemsCached.push(ref);
+      if (!ref.latis.lazy) {
+        if (Container.isFilled()) {
+          enterOverload();
+        } else {
+          pushCachedBlocks();
+        }
       }
     } else {
       Container.put(ref);
       if (getRowHeight() < Settings.maxRowHeight) {
         enter();
-        pushCachedBlocks();
       }
     }
     return true;
@@ -41,6 +41,7 @@ export default function (Settings) {
       increaseOffsetTop(getRowHeight());
       Container.clear();
     }
+    pushCachedBlocks();
   }
 
   function enterOverload() {
@@ -48,8 +49,8 @@ export default function (Settings) {
       const finalHeight = buildRow(Settings.maxRowHeight, Settings.overloadBehaviour);
       increaseOffsetTop(finalHeight);
       Container.clear();
-      pushCachedBlocks();
     }
+    pushCachedBlocks();
   }
 
   function forceEnter() {
