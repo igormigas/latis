@@ -138,7 +138,7 @@ module.exports = {
   },
   devServer: {
     port: 4000,
-    open: true,
+    open: false,
     contentBase: path.resolve(ROOT, dirHostRoot),
     historyApiFallback: true,
     publicPath: '/',

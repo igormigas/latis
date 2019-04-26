@@ -4,3 +4,4 @@ app/config
 dev
 demo
 demo/assets/photos
+*.test.js
