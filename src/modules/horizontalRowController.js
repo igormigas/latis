@@ -13,7 +13,7 @@ export default function (Settings) {
     if (ref.latis.display === false) {
       return false;
     }
-    if (ref.latis.scriptType !== 'image' && Settings.ignoreBlocks) {
+    if (ref.latis.scriptType === 'block' && Settings.ignoreBlocks) {
       return false;
     }
 
@@ -95,11 +95,11 @@ export default function (Settings) {
   function pushCachedBlocks() {
     if (itemsCached.length > 0) {
       itemsCached.forEach(item => {
-        let rowHeight = containerWidth / item.latis.ratio;
+        let rowHeight = item.scrollHeight;
         setItemParams(
           item,
           containerWidth,
-          rowHeight,
+          'auto',
           currentOffsetTop,
           0
         );

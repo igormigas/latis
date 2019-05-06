@@ -43,6 +43,11 @@ export default function (array, settings, containerWidth) {
       params.originalWidth = $img.naturalWidth;
       params.originalHeight = $img.naturalHeight;
 
+
+      if (settings.ignoreImageStretching === true) {
+        params.stretched = false;
+      }
+
       // Cover image style changes should be moved to different module
       // Todo with infinite scroll functionality
       $img.style.display = 'block';
@@ -55,7 +60,7 @@ export default function (array, settings, containerWidth) {
 
       // Force block without full dimension set
       // to be stretch
-      if (!item.style.width || !item.style.height) {
+      if (!item.style.width || !item.style.height || (item.latis && item.latis.stretched)) {
         params.stretched = true;
       }
     }

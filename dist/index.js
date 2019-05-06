@@ -162,7 +162,7 @@ __webpack_require__.r(__webpack_exports__);
         params.originalHeight = parseInt(item.style.height, 10) || item.scrollHeight; // Force block without full dimension set
         // to be stretch
 
-        if (!item.style.width || !item.style.height) {
+        if (!item.style.width || !item.style.height || item.latis && item.latis.stretched) {
           params.stretched = true;
         }
       }
@@ -266,6 +266,10 @@ function px(val) {
   var currentOffsetTop = 0;
 
   function add(ref) {
+    if (!ref.latis) {
+      console.warn('eoeo', ref);
+    }
+
     if (ref.latis.display === false) {
       return false;
     }
@@ -375,8 +379,10 @@ function px(val) {
   function pushCachedBlocks() {
     if (itemsCached.length > 0) {
       itemsCached.forEach(function (item) {
-        var rowHeight = containerWidth / item.latis.ratio;
-        setItemParams(item, containerWidth, rowHeight, currentOffsetTop, 0);
+        var rowHeight = item.scrollHeight;
+        console.dir(item.scrollHeight);
+        setItemParams(item, containerWidth, 'auto', //rowHeight,
+        currentOffsetTop, 0);
         increaseOffsetTop(rowHeight);
       });
       itemsCached = [];
@@ -451,14 +457,6 @@ function px(val) {
   };
 });
 // CONCATENATED MODULE: ./src/latis.js
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -474,68 +472,92 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 
 
-/* harmony default export */ var latis = (function (_reference, _callback) {
+/* harmony default export */ var latis = (function (_reference, _settings, _callback) {
+  var $ref = Grid(_reference, _settings, _callback);
   return {
-    horizontal: function horizontal() {
+    layout: function layout() {
       var _settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      Grid(_reference, 'horizontal', _settings, _callback);
+      $ref.layout(_settings);
     }
   };
 });
 
-function Grid(_reference, _method) {
-  var _settings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+function Grid(_reference) {
+  var _settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-  var _callback = arguments.length > 3 ? arguments[3] : undefined;
+  var _callback = arguments.length > 2 ? arguments[2] : undefined;
 
   var $container = _reference;
 
   var itemsRefs = _toConsumableArray($container.children);
 
+  var acceptedItems;
+  var deniedItems;
   var settings = {
-    maxRowHeight: _settings.maxRowHeight || 350,
-    minContainerWidth: _settings.minContainerWidth || 400,
-    gutter: _settings.gutter || 15,
-    overloadBehaviour: _settings.overloadBehaviour || 'left',
-    itemSelector: _settings.itemSelector || 'latis-item',
-    imageSelector: _settings.imageSelector || 'latis-image',
-    stretchedSelector: _settings.stretchedSelector || 'stretched',
-    lazySelector: _settings.lazySelector || 'lazy',
-    hiddenSelector: _settings.hiddenSelector || 'hidden',
-    ignoreBlocks: _settings.ignoreBlocks || false,
-    ignoreImageStretching: _settings.ignoreImageStretching || false
+    maxRowHeight: 350,
+    minContainerWidth: 400,
+    gutter: 15,
+    overloadBehaviour: 'left',
+    itemSelector: 'latis-item',
+    imageSelector: 'latis-image',
+    stretchedSelector: 'stretched',
+    lazySelector: 'lazy',
+    hiddenSelector: 'hidden',
+    ignoreBlocks: false,
+    ignoreImageStretching: false
   };
   var state = {
-    containerWidth: $container.offsetWidth,
-    finalContainerHeight: 0
-  }; //
-  // PROCESS
-  //
-  // Todo:
-  // - redesign process flow
-  // - export some parts to external modules
-  // - optimize and split tasks
+    containerWidth: getCurrentContainerWidth(),
+    finalContainerHeight: 0,
+    structuresBuilded: false
+  }; ////////////////////////////////////////
+  // INIT PROCESS
+  ////////////////////////////////////////
 
-  var _buildItemDataStructu = buildItemDataStructure(itemsRefs, settings, state.containerWidth),
-      _buildItemDataStructu2 = _slicedToArray(_buildItemDataStructu, 2),
-      items = _buildItemDataStructu2[0],
-      deniedItems = _buildItemDataStructu2[1];
-
-  prepareHtmlEnvironment();
-  hideItems(deniedItems);
-  calculateGridHorizontal(_toConsumableArray(items));
-  setContainerHeightStyle(state.finalContainerHeight);
-  pushToDOM(items); //
-  // CALLBACK
-  //
-
-  if (typeof _callback === 'function') {
-    _callback();
-  } //
+  prepareHtmlEnvironment(); ////////////////////////////////////////
   // FUNCTIONS
-  //
+  ////////////////////////////////////////
 
+  function layout(settings) {
+    updateSettings(settings);
+
+    if (!state.structuresBuilded) {
+      buildStructures();
+      hideDeniedItems(deniedItems);
+    }
+
+    if (noItems()) {
+      // Error - there is no items to process in given reference.
+      console.error('There is no items in referenced container. Nothing to process.');
+      console.log(itemsRefs);
+      return false;
+    }
+
+    calculateGridHorizontal(acceptedItems);
+    setContainerHeightStyle(state.finalContainerHeight);
+    pushToDOM(acceptedItems);
+    console.log('Horizontal grid calculated');
+  }
+
+  function updateSettings() {
+    var newSettings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    for (var property in newSettings) {
+      //console.log('updateSettings: '+ property)
+      if (settings[property]) {
+        settings[property] = newSettings[property];
+      }
+    }
+  }
+
+  function buildStructures() {
+    var results = buildItemDataStructure(itemsRefs, settings, getCurrentContainerWidth());
+    acceptedItems = results[0];
+    deniedItems = results[1];
+    state.structuresBuilded = true;
+    console.log('Structures builded');
+  }
 
   function prepareHtmlEnvironment() {
     if (['absolute', 'fixed', 'relative'].includes($container.style.position) === false) {
@@ -544,7 +566,7 @@ function Grid(_reference, _method) {
   }
 
   function calculateGridHorizontal(items) {
-    var containerWidth = state.containerWidth;
+    var containerWidth = getCurrentContainerWidth();
     var Row = horizontalRowController(settings);
     Row.setWidth(containerWidth);
 
@@ -569,11 +591,10 @@ function Grid(_reference, _method) {
     $container.style.height = px(Math.ceil(value));
   }
 
-  function pushToDOM(items) {
-    items.forEach(function (item) {
+  function pushToDOM(nodes) {
+    nodes.forEach(function (item) {
       var css = item.style;
-      var params = item.latis; //css.position = 'absolute';
-
+      var params = item.latis;
       css.width = px(params.width);
       css.height = px(params.height);
       css.top = px(params.offsetTop);
@@ -585,11 +606,33 @@ function Grid(_reference, _method) {
     ref.style.display = 'none';
   }
 
-  function hideItems(array) {
+  function hideDeniedItems(array) {
     array.forEach(function (ref) {
       return hide(ref);
     });
   }
+
+  function noItems() {
+    return !acceptedItems.length > 0;
+  }
+
+  function getCurrentContainerWidth() {
+    return $container.offsetWidth;
+  } //
+  // CALLBACK
+  //
+
+
+  if (typeof _callback === 'function') {
+    _callback();
+  } //
+  // FUNCTIONS
+  //
+
+
+  return {
+    layout: layout
+  };
 }
 // CONCATENATED MODULE: ./src/index.js
 
