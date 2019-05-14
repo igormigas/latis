@@ -1,15 +1,8 @@
 export default function () {
   let items = [];
-  let ratio = 0;
-
-  function clear() {
-    items = [];
-    ratio = 0;
-  }
 
   function put(elem) {
     items.push(elem);
-    recalculateRatio();
   }
 
   function get(pos) {
@@ -19,37 +12,28 @@ export default function () {
     return items;
   }
 
+  function clear() {
+    items = [];
+  }
+
   function count() {
     return items.length;
   }
 
-  function recalculateRatio() {
-    let sumRatio = 0;
-    items.forEach(item => {
-      sumRatio += item.latis.ratio;
-    });
-    ratio = sumRatio;
-  }
-
-  function isEmpty(arr = items.length) {
-    return !arr;
+  function isEmpty() {
+    return !isFilled();
   }
 
   function isFilled() {
-    return !isEmpty();
-  }
-
-  function getContentRatio() {
-    return ratio;
+    return items.length > 0;
   }
 
   return {
-    clear,
     put,
     get,
+    clear,
     count,
     isEmpty,
     isFilled,
-    getContentRatio,
   };
 }

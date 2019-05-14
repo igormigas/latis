@@ -3,22 +3,30 @@
  * v0.3.0
  */
 
+import * as utils from './modules/utils';
 import buildItemDataStructure from './modules/buildItemDataStructure';
 import horizontalRowController from './modules/horizontalRowController';
-import imagesLoaded from './modules/imagesLoaded';
-import { px } from './modules/functions';
 
-export default function (_reference, _settings, _callbackFunction) {
-  const $ref = Grid(_reference, _settings, _callbackFunction);
-  return {
-    layout: (_settings = {}) => {
-      $ref.layout(_settings);
-    },
-  };
+export default function (_reference, _callbackFunction) {
+  let $ref;
+  try {
+    $ref = Grid(_reference, _callbackFunction);
+    return {
+      layout: (_settings = {}) => {
+        $ref.layout(_settings);
+      },
+    };
+  }
+  catch (e) {
+    console.error(e);
+    return {
+      layout: function () {},
+    };
+  }
 }
 
-function Grid(_reference, _settings = {}, _callbackFunction) {
-  const $container = _reference;
+function Grid(_reference, _callbackFunction) {
+  const $container = testReference(_reference);
   const itemsRefs = [...$container.children];
   let acceptedItems;
   let deniedItems;
@@ -43,63 +51,37 @@ function Grid(_reference, _settings = {}, _callbackFunction) {
     containerWidth: getCurrentContainerWidth(),
     finalContainerHeight: 0,
     structuresBuilded: false,
-    imagesLoaded: false,
   };
 
   ////////////////////////////////////////
   // INIT PROCESS
   ////////////////////////////////////////
 
-  prepareHtmlEnvironment();
-
-
+  prepareHtmlEnvironment($container);
 
   ////////////////////////////////////////
   // FUNCTIONS
   ////////////////////////////////////////
 
-  function layout(settings) {
-    updateSettings(settings);
+  function testReference(ref) {
+    if (ref instanceof HTMLElement) {
+      return ref;
+    }
+    throw new Error('The container reference is not a valid HTMLElement.');
+  }
+
+  function layout(_settings) {
+    updateSettings(_settings);
     if (!state.structuresBuilded) {
-      onWindowTrueLoad(() => {
+      onTrueLoad(() => {
         buildStructures();
-        hideDeniedItems(deniedItems);
+        utils.hideAll(deniedItems);
         calculateAcceptedItems();
-        callback();
+        onReadyCallback();
       });
     } else {
       calculateAcceptedItems();
     }
-  }
-
-  function calculateAcceptedItems() {
-    if (noItems()) {
-      // Error - there is no items to process in given reference.
-      console.error('There is no items in referenced container. Nothing to process.');
-      return false;
-    }
-    calculateGridHorizontal(acceptedItems);
-    setContainerHeightStyle(state.finalContainerHeight);
-    pushToDOM(acceptedItems);
-  }
-
-  // Current version based on DOMConteneLoaded and imagesLoaded
-  // lets init the calculation when scripts and JS styles
-  // were applied and images are loaded,
-  // but probably before final load event, which is better.
-  function onWindowTrueLoad(successCallback, failureCallback) {
-    window.addEventListener('DOMContentLoaded', () => {
-      const imgNodes = $container.querySelectorAll('img.' + settings.imageSelector);
-      imagesLoaded(imgNodes)
-        .then(successCallback)
-        .catch(e => {
-          if (typeof failureCallback === 'function') {
-            failureCallback(e);
-          } else {
-            console.error(e);
-          }
-        });
-    });
   }
 
   function updateSettings(newSettings = {}) {
@@ -117,10 +99,16 @@ function Grid(_reference, _settings = {}, _callbackFunction) {
     state.structuresBuilded = true;
   }
 
-  function prepareHtmlEnvironment() {
-    if (['absolute', 'fixed', 'relative'].includes($container.style.position) === false) {
-      $container.style.position = 'relative';
+  function calculateAcceptedItems() {
+    if (noItems()) {
+      // Error - there is no items to process in given reference.
+      console.error('There is no items in referenced container. Nothing to process.');
+      return false;
     }
+    calculateGridHorizontal(acceptedItems);
+    setContainerHeight($container, state.finalContainerHeight);
+    pushToDOM(acceptedItems);
+    return null;
   }
 
   function calculateGridHorizontal(items) {
@@ -129,6 +117,7 @@ function Grid(_reference, _settings = {}, _callbackFunction) {
     const Row = horizontalRowController(settings);
     Row.setWidth(containerWidth);
 
+    // Check performance of array.forEach() and loop continue possibility
     for (let i = 0, countItems = items.length; i < countItems; i++) {
       let result = Row.add(items[i]);
       if (!result) {
@@ -143,27 +132,37 @@ function Grid(_reference, _settings = {}, _callbackFunction) {
     state.finalContainerHeight = Row.getFinalHeight();
   }
 
-  function setContainerHeightStyle(value) {
-    $container.style.height = px(Math.ceil(value));
+  function onTrueLoad(successCallback, failureCallback) {
+    const imgNodes = $container.querySelectorAll('img.' + settings.imageSelector);
+
+    if (document.readystate === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        utils.whenImagesLoaded(imgNodes, successCallback, failureCallback);
+      });
+    } else {
+      utils.whenImagesLoaded(imgNodes, successCallback, failureCallback);
+    }
   }
 
-  function pushToDOM(nodes) {
-    nodes.forEach(item => {
+  function prepareHtmlEnvironment(container) {
+    if (['absolute', 'fixed', 'relative'].includes(container.style.position) === false) {
+      container.style.position = 'relative';
+    }
+  }
+
+  function setContainerHeight(container, height) {
+    container.style.height = utils.px(Math.ceil(height));
+  }
+
+  function pushToDOM(items) {
+    items.forEach(item => {
       const css = item.style;
       const params = item.latis;
-      css.width = px(params.width);
-      css.height = px(params.height);
-      css.top = px(params.offsetTop);
-      css.left = px(params.offsetLeft);
+      css.width = utils.px(params.width);
+      css.height = utils.px(params.height);
+      css.top = utils.px(params.offsetTop);
+      css.left = utils.px(params.offsetLeft);
     });
-  }
-
-  function hide(ref) {
-    ref.style.display = 'none';
-  }
-
-  function hideDeniedItems(array) {
-    array.forEach(ref => hide(ref));
   }
 
   function noItems() {
@@ -174,7 +173,7 @@ function Grid(_reference, _settings = {}, _callbackFunction) {
     return $container.offsetWidth;
   }
 
-  function callback() {
+  function onReadyCallback() {
     if (typeof _callbackFunction === 'function') {
       _callbackFunction();
     }

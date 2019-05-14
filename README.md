@@ -45,25 +45,18 @@ JS:
 ```javascript
 import Latis from 'latis';
 
-var container = document.getElementById('latis');
-document.onreadystatechange = () => {
-  if (document.readyState === 'complete') {
-    Latis(container).horizontal();
-  };
-}
-```
+const container = document.getElementById('latis');
 
-What you need to know is:
-1. The script obtains the width of given container as its calculation base parameter. However, you and your CSS have control over it as usual, you decide whether it is fixed or responsive.
-2. Latis works best with some images or galleries. Put an image with `.latis-image` class inside an item to let the script find proper proportions.
-3. Latis obtains all necessary size data from fully loaded images, therefore we need to make sure the script is being run at the very end.
+const lts = Latis(container);
+lts.layout();
+```
 
 #### Basic settings
 To make changes in layout look and behaviour, use some basic settings.
 For clarity, from this point examples are stripped from checking if document is ready.
 
 ```javascript
-Latis(container).horizontal({
+lts.layout({
   maxRowHeight: 300,
   gutter: 15,
   overloadBehaviour: 'hide',
@@ -76,10 +69,11 @@ You can find more details about settings in the end of documentation.
 If for any reason you need to know when the script has finished, use callback.
 
 ```javascript
-var callback = function() {
+const callback = function() {
   console.log('Latis has finished');
 }
-Latis(container, callback).horizontal(settings);
+const lts = Latis(container, callback);
+lts.layout();
 ```
 
 ## Settings and advanced usage

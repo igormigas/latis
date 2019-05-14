@@ -28,7 +28,7 @@ const dirSrc = 'src/';
 //
 module.exports = {
   mode: 'production',
-  devtool: false,
+  devtool: 'cheap-source-map',
   entry: {
     index: path.resolve(ROOT, dirSrc, 'index.js'),
   },
@@ -127,6 +127,7 @@ module.exports = {
   optimization: {
     minimizer: [
       new OptimizeCSSAssetsPlugin({}),
+      new UglifyJsPlugin(),
     ],
   },
   stats: {

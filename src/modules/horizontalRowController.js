@@ -1,10 +1,10 @@
 
 import horizontalRowContainer from './horizontalRowContainer';
-import { getWidthByHeight } from './functions';
+import { getWidthByHeight } from './utils';
 
-export default function (Settings) {
+export default function (settings) {
   const Container = horizontalRowContainer();
-  let itemsCached = [];
+  const StrContainer = horizontalRowContainer();
 
   let containerWidth;
   let currentOffsetTop = 0;
@@ -13,22 +13,21 @@ export default function (Settings) {
     if (ref.latis.display === false) {
       return false;
     }
-    if (ref.latis.scriptType === 'block' && Settings.ignoreBlocks) {
+    if (ref.latis.scriptType === 'block' && settings.ignoreBlocks) {
       return false;
     }
 
     if (ref.latis.stretched) {
-      itemsCached.push(ref);
+      StrContainer.put(ref);
       if (!ref.latis.lazy) {
         if (Container.isFilled()) {
           enterOverload();
-        } else {
-          pushCachedBlocks();
         }
+        pushCachedBlocks();
       }
     } else {
       Container.put(ref);
-      if (getRowHeight() < Settings.maxRowHeight) {
+      if (getRowHeight() < settings.maxRowHeight) {
         enter();
       }
     }
@@ -46,7 +45,7 @@ export default function (Settings) {
 
   function enterOverload() {
     if (Container.isFilled()) {
-      const finalHeight = buildRow(Settings.maxRowHeight, Settings.overloadBehaviour);
+      const finalHeight = buildRow(settings.maxRowHeight, settings.overloadBehaviour);
       increaseOffsetTop(finalHeight);
       Container.clear();
     }
@@ -57,15 +56,16 @@ export default function (Settings) {
     enter();
   }
 
-  function buildRow(height, align = 'auto') {
+  function buildRow(height, align) {
     let rowHeight = 0;
+    let currentOffsetLeft = 0;
+
     if (Container.isFilled()) {
-      let currentOffsetLeft = 0;
       rowHeight = getRowHeight();
 
       if (align !== 'auto' && height) {
         rowHeight = height;
-        let rowWidth = getRowWidth(rowHeight);
+        const rowWidth = getRowWidth(rowHeight);
         switch (align) {
           case 'right':
             currentOffsetLeft = containerWidth - rowWidth;
@@ -77,49 +77,66 @@ export default function (Settings) {
         }
       }
 
-      for (let item of Container.get()) {
-        let itemWidth = getWidthByHeight(rowHeight, item.latis.ratio);
-        setItemParams(
-          item,
-          itemWidth,
-          rowHeight,
-          currentOffsetTop,
-          currentOffsetLeft
-        );
-        currentOffsetLeft += itemWidth + Settings.gutter;
-      }
+      Container.get().forEach(item => {
+        const itemWidth = getWidthByHeight(rowHeight, item.latis.ratio);
+        set(item).size(itemWidth, rowHeight).position(currentOffsetLeft, currentOffsetTop);
+        currentOffsetLeft += itemWidth + settings.gutter;
+      });
     }
     return rowHeight;
   }
 
   function pushCachedBlocks() {
-    if (itemsCached.length > 0) {
-      itemsCached.forEach(item => {
+    if (StrContainer.isFilled()) {
+      StrContainer.get().forEach(item => {
         let rowHeight = item.scrollHeight;
-        setItemParams(
-          item,
-          containerWidth,
-          'auto',
-          currentOffsetTop,
-          0
-        );
+        set(item).size(containerWidth,'auto').position(0,currentOffsetTop);
         increaseOffsetTop(rowHeight);
       });
-      itemsCached = [];
+      StrContainer.clear();
     }
+  }
+
+  function set(item) {
+    const ref = item.latis;
+
+    function size(w, h) {
+      ref.width = w;
+      ref.height = h;
+      return scope;
+    }
+
+    function position(x, y) {
+      ref.offsetTop = y;
+      ref.offsetLeft = x;
+      return scope;
+    }
+
+    const scope = {
+      size,
+      position
+    };
+    return scope;
   }
 
   function getRowHeight(width = containerWidth) {
     const len = Container.count();
-    const ratio = Container.getContentRatio();
-    const workWidth = width - (len - 1) * Settings.gutter;
+    const ratio = getContentRatio();
+    const workWidth = width - (len - 1) * settings.gutter;
     return (ratio > 0) ? workWidth / ratio : null;
   }
 
   function getRowWidth(height) {
     const len = Container.count();
-    const ratio = Container.getContentRatio();
-    return (ratio > 0) ? height * ratio + (len - 1) * Settings.gutter : null;
+    const ratio = getContentRatio();
+    return (ratio > 0) ? height * ratio + (len - 1) * settings.gutter : null;
+  }
+
+  function getContentRatio() {
+    let ratio = 0;
+    const items = Container.get();
+    items.forEach(item => ratio += item.latis.ratio);
+    return ratio;
   }
 
   function clear() {
@@ -130,22 +147,8 @@ export default function (Settings) {
     return Container.isEmpty();
   }
 
-  function setItemParams(item, width, height, offTop, offLeft) {
-    item.latis.width = width;
-    item.latis.height = height;
-    item.latis.offsetTop = offTop;
-    item.latis.offsetLeft = offLeft;
-  }
-
   function increaseOffsetTop(height) {
-    currentOffsetTop += height + Settings.gutter;
-  }
-
-  function get(pos) {
-    if (pos !== undefined) {
-      return items[pos] || null;
-    }
-    return items;
+    currentOffsetTop += height + settings.gutter;
   }
 
   function setWidth(value) {
@@ -158,17 +161,15 @@ export default function (Settings) {
   }
 
   function getFinalHeight() {
-    return currentOffsetTop - Settings.gutter;
+    return currentOffsetTop - settings.gutter;
   }
 
   return {
     add,
     clear,
-    get,
     forceEnter,
     enterOverload,
     setWidth,
-    getRowHeight,
     getOffsetTop,
     getFinalHeight,
     isEmpty,
