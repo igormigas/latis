@@ -1,6 +1,6 @@
 {
   "name": "latis",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack -p --config config/webpack.config.prod.js",
